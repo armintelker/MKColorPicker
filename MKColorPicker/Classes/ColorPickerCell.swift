@@ -16,41 +16,35 @@ class ColorPickerCell: UICollectionViewCell {
     
     /// The reuse identifier used to register the UICollectionViewCell to the UICollectionView
     static let cellIdentifier = String(describing: ColorPickerCell.self)
-    
+    var colorLabel: UILabel
     //MARK: - Initializer
     
     init() {
         super.init(frame: CGRect.zero)
         commonInit()
+        colorLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.frame.size.width, height:20))
+        colorLabel.backgroundColor = UIColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 0.5)
+        colorLabel.font = UIFont(name: colorLabel.font.fontName, size: 10)
+        contentView.addSubview(colorLabel)
+        clipsToBounds = true
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         commonInit()
+        colorLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.frame.size.width, height:20))
+        colorLabel.backgroundColor = UIColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 0.5)
+        colorLabel.font = UIFont(name: colorLabel.font.fontName, size: 10)
+        contentView.addSubview(colorLabel)
+        clipsToBounds = true
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Private methods
-    
     fileprivate func commonInit() {
-        
-        // Setup of checkbox
-//        checkbox.isUserInteractionEnabled = false
-//        checkbox.backgroundColor = .clear
-//        checkbox.hideBox = true
-//        checkbox.setCheckState(.unchecked, animated: false)
-//        
-//        self.addSubview(checkbox)
-//        
-//        // Setup constraints to checkbox
-//        checkbox.translatesAutoresizingMaskIntoConstraints = false
-//        self.addConstraint(NSLayoutConstraint(item: checkbox, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1.0, constant: 14))
-//        self.addConstraint(NSLayoutConstraint(item: checkbox, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1.0, constant: 14))
-//        self.addConstraint(NSLayoutConstraint(item: checkbox, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: -14))
-//        self.addConstraint(NSLayoutConstraint(item: checkbox, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: -14))
+        colorLabel.text = "#FFFFFF"
     }
     
     
@@ -65,3 +59,4 @@ class ColorPickerCell: UICollectionViewCell {
     }
     
 }
+
