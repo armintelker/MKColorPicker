@@ -11,7 +11,13 @@ public enum ColorPickerViewSelectStyle {
 }
 
 open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    open var colors = [UIColor]()  {
+    open var headerTitles = [String]()  {
+        didSet {
+            collectionView.reloadData()
+        }
+    }
+    
+    open var colors = [[UIColor]]()  {
         didSet {
             if colors.isEmpty {
                 fatalError("ERROR ColorPickerView - You must set at least 1 color!")
@@ -25,18 +31,14 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         return indexSelectedColor
     }
     
-    open var preselectedIndex: Int? = nil {
+    open var preselectedIndex: IndexPath? = nil {
         didSet {
-            guard let index = preselectedIndex else { return }
-            guard index >= 0, colors.indices.contains(index) else {
-                print("ERROR ColorPickerView - preselectedItem out of colors range")
-                return
-            }
-            indexSelectedColor = preselectedIndex
+            indexSelectedColor = preselectedIndex!.item
             
-            collectionView.selectItem(at: IndexPath(item: indexSelectedColor!, section: 0), animated: false, scrollPosition: .centeredHorizontally)
+            collectionView.selectItem(at: preselectedIndex, animated: false, scrollPosition: .centeredHorizontally)
         }
     }
+    
     open var isSelectedColorTappable: Bool = true
     open var scrollToPreselectedIndex: Bool = false
     open var style: ColorPickerViewStyle = .circle{
@@ -72,6 +74,8 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.allowsMultipleSelection = false
         collectionView.backgroundColor = .clear
+        collectionView.register(SecitonCollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "SecitonCollectionHeaderView")
+        
         return collectionView
     }()
     
@@ -85,20 +89,40 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         self.addConstraint(NSLayoutConstraint(item: collectionView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: 0))
         
         if let preselectedIndex = preselectedIndex, !scrollToPreselectedIndex {
-            // Scroll to the first color
-            collectionView.scrollToItem(at: IndexPath(item: preselectedIndex, section: 0), at: .top, animated: false)
+            collectionView.scrollToItem(at: preselectedIndex, at: .top, animated: false)
         }
     }
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return colors[section].count
+    }
+    
+    public func numberOfSections(in collectionView: UICollectionView) -> Int {
         return colors.count
+    }
+
+    public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+       
+        if kind == UICollectionElementKindSectionHeader {
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier:"SecitonCollectionHeaderView", for: indexPath) as! SecitonCollectionHeaderView
+            headerView.sectionLabel.text = headerTitles[indexPath.section]
+            headerView.backgroundColor = UIColor(red: 0.85, green: 0.85, blue: 0.85, alpha: 1.0)
+            
+            return headerView
+        } else {
+            return UICollectionReusableView()
+        }
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width:collectionView.frame.size.width, height:30)
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorPickerCell.cellIdentifier, for: indexPath) as! ColorPickerCell
         
-        cell.backgroundColor = colors[indexPath.item]
-        cell.colorLabel!.text = " #\(colors[indexPath.item].rgbString.uppercased())"
+        cell.backgroundColor = colors[indexPath.section][indexPath.item]
+        cell.colorLabel!.text = " #\(colors[indexPath.section][indexPath.item].rgbString.uppercased())"
         if style == .circle {
             cell.layer.cornerRadius = cell.bounds.width / 2
         }else{

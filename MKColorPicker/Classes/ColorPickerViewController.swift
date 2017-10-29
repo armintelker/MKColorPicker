@@ -32,9 +32,15 @@ open class ColorPickerViewController: UIViewController, UIPopoverPresentationCon
         }
     }
     
-    open var allColors = [UIColor](){
+    open var allColors = [[UIColor]](){
         didSet{
             colorPickerView.colors = allColors
+        }
+    }
+    
+    open var headerTitles = [String]() {
+        didSet{
+            colorPickerView.headerTitles = headerTitles
         }
     }
     
@@ -44,12 +50,7 @@ open class ColorPickerViewController: UIViewController, UIPopoverPresentationCon
         }
     }
     
-    
-    
-    
     let colorPickerView = ColorPickerView(frame: CGRect(x: 0, y: 0, width: 250, height: 250))
-    
-    
     
     public init()
     {
@@ -63,7 +64,7 @@ open class ColorPickerViewController: UIViewController, UIPopoverPresentationCon
     
     
     func setup(){
-        allColors = defaultPaletteColors
+        allColors = [defaultPaletteColors]
         colorPickerView.layoutDelegate = self
         colorPickerView.delegate = self
         colorPickerView.style = style
@@ -107,7 +108,7 @@ open class ColorPickerViewController: UIViewController, UIPopoverPresentationCon
 extension ColorPickerViewController: ColorPickerViewDelegate, ColorPickerViewDelegateFlowLayout{
     
     public func colorPickerView(_ colorPickerView: ColorPickerView, didSelectItemAt indexPath: IndexPath) {
-        self.selectedColor?(colorPickerView.colors[indexPath.item])
+        self.selectedColor?(colorPickerView.colors[indexPath.section][indexPath.item])
         if autoDismissAfterSelection{
             self.dismiss(animated: true, completion: nil)
         }
