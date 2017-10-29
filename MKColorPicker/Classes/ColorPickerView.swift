@@ -1,13 +1,3 @@
-//
-// Copyright (c) 2017 malkouz
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-
 import UIKit
 
 public enum ColorPickerViewStyle {
@@ -21,10 +11,6 @@ public enum ColorPickerViewSelectStyle {
 }
 
 open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    
-    // MARK: - Open properties
-    
-    /// Array of UIColor you want to show in the color picker
     open var colors = [UIColor]()  {
         didSet {
             if colors.isEmpty {
@@ -33,15 +19,12 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
             collectionView.reloadData()
         }
     }
-    /// The object that acts as the layout delegate for the color picker
     open var layoutDelegate: ColorPickerViewDelegateFlowLayout?
-    /// The object that acts as the delegate for the color picker
     open var delegate: ColorPickerViewDelegate?
-    /// The index of the selected color in the color picker 
     open var indexOfSelectedColor: Int? {
         return indexSelectedColor
     }
-    /// The index of the preselected color in the color picker
+    
     open var preselectedIndex: Int? = nil {
         didSet {
             guard let index = preselectedIndex else { return }
@@ -54,17 +37,13 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
             collectionView.selectItem(at: IndexPath(item: indexSelectedColor!, section: 0), animated: false, scrollPosition: .centeredHorizontally)
         }
     }
-    /// If true, the selected color can be deselected by a tap
     open var isSelectedColorTappable: Bool = true
-    /// If true, the preselectedIndex is showed in the center of the color picker
     open var scrollToPreselectedIndex: Bool = false
-    /// Style of the color picker cells
     open var style: ColorPickerViewStyle = .circle{
         didSet{
             collectionView.reloadData()
         }
     }
-    /// Style applied when a color is selected
     open var selectionStyle: ColorPickerViewSelectStyle = .check
     
     open var scrollDirection: UICollectionViewScrollDirection = .horizontal{
@@ -79,7 +58,6 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         }
     }
     
-    // MARK: - Private properties
     fileprivate var indexSelectedColor: Int?
     fileprivate lazy var collectionView: UICollectionView = {
         
@@ -97,8 +75,6 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         return collectionView
     }()
     
-    // MARK: - View management
-    
     open override func layoutSubviews() {
         self.addSubview(collectionView)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -108,14 +84,11 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         self.addConstraint(NSLayoutConstraint(item: collectionView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 0))
         self.addConstraint(NSLayoutConstraint(item: collectionView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: 0))
         
-        // Check on scrollToPreselectedIndex
         if let preselectedIndex = preselectedIndex, !scrollToPreselectedIndex {
             // Scroll to the first color
             collectionView.scrollToItem(at: IndexPath(item: preselectedIndex, section: 0), at: .top, animated: false)
         }
     }
-    
-    // MARK: - UICollectionViewDataSource
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return colors.count
@@ -125,7 +98,7 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorPickerCell.cellIdentifier, for: indexPath) as! ColorPickerCell
         
         cell.backgroundColor = colors[indexPath.item]
-        
+        cell.colorLabel!.text = " #\(colors[indexPath.item].rgbString.uppercased())"
         if style == .circle {
             cell.layer.cornerRadius = cell.bounds.width / 2
         }else{
@@ -134,8 +107,6 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         
         return cell
     }
-    
-    // MARK: - UICollectionViewDelegate
     
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         
@@ -152,7 +123,6 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         colorPickerCell.setSelected(selected: true)
     }
     
-    // TODO: - This method need to be refactored in order to be more readable and expressive
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let colorPickerCell = collectionView.cellForItem(at: indexPath) as! ColorPickerCell
         
@@ -181,7 +151,6 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
     
     public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         
-        // Check if the old color cell is showed. If true, it deselects it
         guard let oldColorCell = collectionView.cellForItem(at: indexPath) as? ColorPickerCell else {
             return
         }
@@ -194,8 +163,6 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
         
         delegate?.colorPickerView?(self, didDeselectItemAt: indexPath)
     }
-    
-    // MARK: - UICollectionViewDelegateFlowLayout
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if let layoutDelegate = layoutDelegate, let sizeForItemAt = layoutDelegate.colorPickerView?(self, sizeForItemAt: indexPath) {
@@ -226,3 +193,4 @@ open class ColorPickerView: UIView, UICollectionViewDelegate, UICollectionViewDa
     }
     
 }
+
